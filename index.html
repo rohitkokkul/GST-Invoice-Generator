@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST Invoice Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Form Section -->
+        <section id="form-section">
+            <h2>GST Invoice Generator</h2>
+
+            <!-- Saved Profiles Controls -->
+            <div class="profiles-controls"
+                style="display: flex; gap: 10px; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; align-items: center; justify-content: space-between;">
+                <div style="display: flex; gap: 10px; align-items: center; flex: 1;">
+                    <label for="profile-select" style="font-weight: bold;">Load Profile:</label>
+                    <select id="profile-select"
+                        style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid #ccc; max-width: 300px;">
+                        <option value="">-- Select a saved profile --</option>
+                    </select>
+                    <button type="button" id="btn-load-profile" class="btn btn-secondary"
+                        style="padding: 8px 15px;">Load</button>
+                    <button type="button" id="btn-delete-profile" class="btn btn-danger"
+                        style="padding: 8px 15px;">Delete</button>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="profile-name" placeholder="Profile Name (e.g., Client A)"
+                        style="margin: 0; padding: 8px; max-width: 200px;">
+                    <button type="button" id="btn-save-profile" class="btn btn-primary"
+                        style="background: #e67e22; padding: 8px 15px;">Save Current</button>
+                </div>
+            </div>
+
+            <form id="invoice-form">
+                <div class="form-grid">
+                    <!-- Company Details -->
+                    <fieldset class="form-group">
+                        <legend>Company Details</legend>
+                        <input type="text" id="c-name" placeholder="Company Name" value="INFINITUM ENTERPRISES"
+                            required>
+                        <textarea id="c-address" placeholder="Address"
+                            required>1084,BHAKARVAD TO DEHEN ROAD, MEDEKHAR-402108</textarea>
+                        <input type="text" id="c-gstin" placeholder="GSTIN/UIN" value="27CEJPP4736F1Z8" required>
+                        <input type="text" id="c-state" placeholder="State Name" value="Maharashtra" required>
+                        <input type="text" id="c-state-code" placeholder="State Code" value="27" required>
+                        <input type="text" id="c-contact" placeholder="Contact number" value="9167076741">
+                        <input type="email" id="c-email" placeholder="Email" value="infinitum.india@gmail.com">
+                    </fieldset>
+
+                    <!-- Buyer Details -->
+                    <fieldset class="form-group">
+                        <legend>Buyer Details</legend>
+                        <input type="text" id="b-name" placeholder="Buyer Name" value="ATMOS CARE PVT.LTD,BHIWANDI"
+                            required>
+                        <textarea id="b-address" placeholder="Buyer Address"
+                            required>G-2,SUMMET LOGISTICS AND IND.PARK, OPP-RAJDHANI OIL PETROL PUMP, KUSKA BORIVALI VILLAGE,NEXT TO SHANGRILA RESORT, BHIWANDI.</textarea>
+                        <input type="text" id="b-gstin" placeholder="GSTIN/UIN" value="27AANCA0147N1ZE">
+                        <input type="text" id="b-state" placeholder="State Name" value="Maharashtra" required>
+                        <input type="text" id="b-state-code" placeholder="State Code" value="27" required>
+                    </fieldset>
+
+                    <!-- Invoice Details -->
+                    <fieldset class="form-group">
+                        <legend>Invoice Details</legend>
+                        <input type="text" id="inv-no" placeholder="Invoice No." value="IE/25-26/02" required>
+                        <input type="date" id="inv-date" placeholder="Dated" value="2026-02-23" required>
+                        <input type="text" id="inv-ref" placeholder="Reference No. & Date."
+                            value="IE/25-26/02 dt. 23-Feb-26">
+                        <input type="text" id="inv-other-ref" placeholder="Other References">
+                        <input type="text" id="inv-remarks" placeholder="Remarks"
+                            value="INVOICE FOR THE MONTH OF APRIL'25">
+                    </fieldset>
+
+                    <!-- Bank Details -->
+                    <fieldset class="form-group">
+                        <legend>Bank Details</legend>
+                        <input type="text" id="bank-name" placeholder="Bank Name" value="BANK OF INDIA" required>
+                        <input type="text" id="bank-acc" placeholder="A/c No." value="125520110000412" required>
+                        <input type="text" id="bank-ifsc" placeholder="Branch & IFS Code"
+                            value="POYNAD BRANCH & BKID0001255" required>
+                    </fieldset>
+                </div>
+
+                <!-- Line Items -->
+                <fieldset class="form-group items-group">
+                    <legend>Line Items</legend>
+                    <div id="items-container"></div>
+                    <div class="items-actions">
+                        <button type="button" id="btn-add-item" class="btn btn-secondary">Add Item</button>
+                    </div>
+                </fieldset>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button type="button" id="btn-save" class="btn btn-primary" style="background: #e67e22;">Save
+                        Data</button>
+                    <button type="button" id="btn-preview" class="btn btn-primary">Preview Invoice</button>
+                    <button type="button" id="btn-reset" class="btn btn-danger">Reset Form</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Preview Section -->
+        <section id="preview-section" class="hidden">
+            <div class="preview-actions">
+                <button type="button" id="btn-edit" class="btn btn-secondary">Edit Invoice</button>
+                <button type="button" id="btn-download" class="btn btn-success">Download PDF</button>
+            </div>
+
+            <div id="invoice-preview" class="invoice-container">
+                <h2 class="invoice-title">Tax Invoice</h2>
+                <div class="invoice-border">
+                    <!-- Top Details -->
+                    <div class="flex-row border-bottom" style="min-height: 180px;">
+                        <div class="col-6 border-right flex-col">
+                            <div class="company-info border-bottom p-1" style="flex: 1;">
+                                <strong id="prev-c-name" class="fs-13"></strong><br>
+                                <span id="prev-c-address"></span><br>
+                                GSTIN/UIN: <span id="prev-c-gstin"></span><br>
+                                State Name <span style="display:inline-block; width: 10px;">:</span> <span
+                                    id="prev-c-state"></span>, Code : <span id="prev-c-state-code"></span><br>
+                                <span id="contact-wrapper">Contact <span
+                                        style="display:inline-block; width: 33px;">:</span> <span
+                                        id="prev-c-contact"></span><br></span>
+                                <span id="email-wrapper">E-Mail <span
+                                        style="display:inline-block; width: 38px;">:</span> <span
+                                        id="prev-c-email"></span></span>
+                            </div>
+                            <div class="buyer-info p-1" style="flex: 1;">
+                                Buyer (Bill to)<br>
+                                <strong id="prev-b-name" class="fs-13"></strong><br>
+                                <span id="prev-b-address" style="white-space: pre-wrap;"></span><br>
+                                GSTIN/UIN <span style="display:inline-block; width: 17px;">:</span> <span
+                                    id="prev-b-gstin"></span><br>
+                                State Name <span style="display:inline-block; width: 10px;">:</span> <span
+                                    id="prev-b-state"></span>, Code : <span id="prev-b-state-code"></span>
+                            </div>
+                        </div>
+                        <div class="col-6 flex-col">
+                            <div class="flex-row border-bottom">
+                                <div class="col-6 border-right p-1 pb-1">
+                                    Invoice No.<br>
+                                    <strong id="prev-inv-no" class="fs-12"></strong>
+                                </div>
+                                <div class="col-6 p-1 pb-1">
+                                    Dated<br>
+                                    <strong id="prev-inv-date" class="fs-12"></strong>
+                                </div>
+                            </div>
+                            <div class="flex-row border-bottom">
+                                <div class="col-6 border-right p-1 pb-1">
+                                    Reference No. & Date.<br>
+                                    <strong id="prev-inv-ref" class="fs-12"></strong>
+                                </div>
+                                <div class="col-6 p-1 pb-1">
+                                    Other References<br>
+                                    <strong id="prev-inv-other-ref" class="fs-12"></strong>
+                                </div>
+                            </div>
+                            <!-- empty space filler -->
+                            <div class="flex-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- Items Table -->
+                    <div class="items-table-wrapper border-bottom">
+                        <table id="prev-items-table" class="full-width-table items-table">
+                            <thead>
+                                <tr>
+                                    <th class="border-right border-bottom" style="width:5%;">SI<br>No.</th>
+                                    <th class="border-right border-bottom" style="width:36%;">Particulars</th>
+                                    <th class="border-right border-bottom" style="width:10%;">HSN/SAC</th>
+                                    <th class="border-right border-bottom" style="width:8%;">GST<br>Rate</th>
+                                    <th class="border-right border-bottom" style="width:10%;">Quantity</th>
+                                    <th class="border-right border-bottom" style="width:10%;">Rate</th>
+                                    <th class="border-right border-bottom" style="width:5%;">per</th>
+                                    <th class="border-bottom" style="width:16%;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="prev-items-body">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="7" class="border-top text-right p-1 pr-2 border-right">Total</td>
+                                    <td class="border-top text-right p-1"><strong class="fs-14">₹ <span
+                                                id="prev-total-amount"></span></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Amount Words -->
+                    <div class="flex-row border-bottom pl-1 pr-1 pt-0_5 pb-0_5">
+                        <div class="col-8">
+                            Amount Chargeable (in words)<br>
+                            <strong class="fs-13" id="prev-amount-words"></strong>
+                        </div>
+                        <div class="col-4 text-right align-self-end text-sm text-italic">
+                            <em>E. & O.E</em>
+                        </div>
+                    </div>
+
+                    <!-- Tax Table -->
+                    <div class="tax-table-wrapper border-bottom">
+                        <table id="prev-tax-table" class="full-width-table tax-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="border-right border-bottom">HSN/SAC</th>
+                                    <th rowspan="2" class="border-right border-bottom">Taxable<br>Value</th>
+                                    <th colspan="2" class="border-right border-bottom">Central Tax</th>
+                                    <th colspan="2" class="border-right border-bottom">State Tax</th>
+                                    <th rowspan="2" class="border-bottom">Total<br>Tax Amount</th>
+                                </tr>
+                                <tr>
+                                    <th class="border-right border-bottom">Rate</th>
+                                    <th class="border-right border-bottom">Amount</th>
+                                    <th class="border-right border-bottom">Rate</th>
+                                    <th class="border-right border-bottom">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="prev-tax-body">
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td class="border-top border-right text-right p-0_5 pr-1"><strong>Total</strong>
+                                    </td>
+                                    <td class="border-top border-right text-right p-0_5"><strong
+                                            id="prev-taxable-total"></strong></td>
+                                    <td class="border-top border-right"></td>
+                                    <td class="border-top border-right text-right p-0_5"><strong
+                                            id="prev-cgst-total"></strong></td>
+                                    <td class="border-top border-right"></td>
+                                    <td class="border-top border-right text-right p-0_5"><strong
+                                            id="prev-sgst-total"></strong></td>
+                                    <td class="border-top text-right p-0_5"><strong id="prev-tax-total"></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Bank Details & Remarks -->
+                    <div class="flex-row border-bottom" style="min-height: 80px;">
+                        <div class="col-6 p-1 flex-col justify-space-between">
+                            <div>
+                                Tax Amount (in words) : <strong><span id="prev-tax-words"></span></strong>
+                            </div>
+                            <div class="mt-2 text-sm" id="remarks-container">
+                                <em>Remarks:</em><br>
+                                <span id="prev-inv-remarks"></span>
+                            </div>
+                        </div>
+                        <div class="col-6 p-1 border-left pt-2 pb-1">
+                            Company's Bank Details<br>
+                            <div class="flex-row">
+                                <div class="bank-label">Bank Name</div> : <strong class="pl-1"
+                                    id="prev-bank-name"></strong>
+                            </div>
+                            <div class="flex-row">
+                                <div class="bank-label">A/c No.</div> : <strong class="pl-1"
+                                    id="prev-bank-acc"></strong>
+                            </div>
+                            <div class="flex-row">
+                                <div class="bank-label">Branch & IFS Code</div> : <strong class="pl-1"
+                                    id="prev-bank-ifsc"></strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signatures -->
+                    <div class="flex-row" style="min-height: 100px;">
+                        <div class="col-6 p-1 border-right flex-col justify-end text-sm">
+                            Customer's Seal and Signature
+                        </div>
+                        <div class="col-6 p-1 flex-col justify-space-between text-right text-sm">
+                            <strong>for <span id="prev-sign-company"></span></strong>
+                            <div style="margin-top: 40px;">
+                                Authorised Signatory
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-1 text-sm pb-2">
+                    This is a Computer Generated Invoice
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
