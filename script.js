@@ -145,8 +145,13 @@ document.addEventListener("DOMContentLoaded", () => {
         row.className = "item-row";
         row.id = `item-row-${itemIndex}`;
 
+        const quillId = `quill-editor-${itemIndex}`;
+
         row.innerHTML = `
-            <input type="text" class="i-particulars" placeholder="Particulars" required>
+            <div class="quill-wrapper" style="flex: 1 1 100%; min-width: 250px; background: #fff; border-radius: 4px; border: 1px solid #ccc; overflow: hidden; margin-bottom: 5px;">
+                <div id="${quillId}" style="min-height: 80px; font-size: 14px;"></div>
+            </div>
+            <input type="hidden" class="i-particulars" required>
             <input type="text" class="i-hsn" placeholder="HSN/SAC">
             <input type="number" class="i-gst" placeholder="GST Rate (%)" min="0" max="100" step="0.1" required>
             <input type="number" class="i-qty" placeholder="Quantity" min="1" step="0.01" required>
@@ -157,6 +162,34 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         itemsContainer.appendChild(row);
+
+        // Initialize Quill Editor
+        const quill = new Quill(`#${quillId}`, {
+            theme: 'snow',
+            placeholder: 'Particulars (multiline, bullet points...)',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }]
+                ]
+            }
+        });
+
+        const hiddenInput = row.querySelector('.i-particulars');
+
+        quill.on('text-change', () => {
+            // Require content
+            if (quill.getText().trim() === '') {
+                hiddenInput.value = '';
+            } else {
+                hiddenInput.value = quill.root.innerHTML;
+            }
+        });
+
+        hiddenInput.setParticulars = (html) => {
+            quill.root.innerHTML = html;
+            hiddenInput.value = html;
+        };
 
         const qty = row.querySelector('.i-qty');
         const rate = row.querySelector('.i-rate');
@@ -174,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Set Default for first row
         if (itemIndex === 1) {
-            row.querySelector('.i-particulars').value = "RENTAL DESKTOP SET";
+            hiddenInput.setParticulars("<p><strong>RENTAL DESKTOP SET</strong></p>");
             row.querySelector('.i-hsn').value = "997315";
             row.querySelector('.i-gst').value = "18";
             row.querySelector('.i-qty').value = "1";
@@ -320,14 +353,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td class="text-center pt-1 pb-1">${index + 1}</td>
-                <td class="pt-1 pb-1"><strong>${particulars}</strong></td>
-                <td class="text-left pt-1 pb-1 pl-1">${hsn}</td>
-                <td class="text-center pt-1 pb-1">${gst ? gst + ' %' : ''}</td>
-                <td class="text-center pt-1 pb-1">${qty}</td>
-                <td class="text-center pt-1 pb-1">${rate ? rate.toFixed(2) : ''}</td>
-                <td class="text-center pt-1 pb-1">${per}</td>
-                <td class="text-right pt-1 pb-1 pr-1"><strong>${amount.toFixed(2)}</strong></td>
+                <td class="text-center pt-1 pb-1" style="vertical-align: top;">${index + 1}</td>
+                <td class="pt-1 pb-1 particulars-preview" style="vertical-align: top;">${particulars}</td>
+                <td class="text-left pt-1 pb-1 pl-1" style="vertical-align: top;">${hsn}</td>
+                <td class="text-center pt-1 pb-1" style="vertical-align: top;">${gst ? gst + ' %' : ''}</td>
+                <td class="text-center pt-1 pb-1" style="vertical-align: top;">${qty}</td>
+                <td class="text-center pt-1 pb-1" style="vertical-align: top;">${rate ? rate.toFixed(2) : ''}</td>
+                <td class="text-center pt-1 pb-1" style="vertical-align: top;">${per}</td>
+                <td class="text-right pt-1 pb-1 pr-1" style="vertical-align: top;"><strong>${amount.toFixed(2)}</strong></td>
             `;
             prevItemsBody.appendChild(tr);
 

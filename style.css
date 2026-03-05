@@ -36,34 +36,141 @@ h2 {
     text-align: center;
 }
 
-.form-grid {
+/* Invoice Form Paper Layout (A4 styled UI) */
+.invoice-form-paper {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.invoice-header-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
 }
 
-.form-group {
-    border: 1px solid #ddd;
+.invoice-section {
+    padding: 20px;
+    border: 1px solid #e0e0e0;
     border-radius: 6px;
-    padding: 15px;
-    background: #fdfdfd;
+    background: #fafafa;
 }
 
-legend {
-    font-weight: bold;
-    color: #2c3e50;
-    padding: 0 5px;
+.invoice-section-title {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #555;
+    font-weight: 700;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 5px;
+    display: inline-block;
+}
+
+.input-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.input-row>* {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 768px) {
+    .app-container {
+        padding: 10px;
+    }
+
+    .invoice-form-paper {
+        padding: 15px;
+    }
+
+    #form-section {
+        padding: 15px;
+    }
+
+    .invoice-header-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .input-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Profiles controls stacking on mobile */
+    .profiles-controls {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .profiles-controls>div {
+        flex-direction: column;
+        align-items: stretch !important;
+        width: 100%;
+    }
+
+    .profiles-controls input,
+    .profiles-controls select {
+        max-width: 100% !important;
+    }
+
+    /* Line Items stacking */
+    .item-row {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 15px;
+    }
+
+    .item-row .i-particulars,
+    .item-row input,
+    .item-row .quill-wrapper {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+
+    .preview-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .preview-actions button {
+        width: 100%;
+    }
 }
 
 input,
-textarea {
+textarea,
+select {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
+    font-family: inherit;
 }
 
 textarea {
@@ -162,6 +269,18 @@ textarea {
     justify-content: center;
     gap: 15px;
     margin-bottom: 20px;
+}
+
+/* Quill Preview Overrides */
+.particulars-preview p {
+    margin: 0;
+    padding: 0;
+}
+
+.particulars-preview ul,
+.particulars-preview ol {
+    margin: 0;
+    padding-left: 20px;
 }
 
 /* Invoice Preview Layout Setup */
