@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <input type="number" class="i-gst" placeholder="GST Rate (%)" min="0" max="100" step="0.1" required>
             <input type="number" class="i-qty" placeholder="Quantity" min="1" step="0.01" required>
             <input type="number" class="i-rate" placeholder="Rate" min="0" step="0.01" required>
-            <input type="text" class="i-per" placeholder="per" style="flex: 1 1 60px;">
+            <input type="text" class="i-per" placeholder="Per" style="flex: 1 1 60px;">
             <input type="number" class="i-amount" placeholder="Amount" readonly>
             <button type="button" class="btn btn-remove" onclick="removeItem(${itemIndex})">X</button>
         `;
