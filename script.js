@@ -404,7 +404,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Add an invisible filler row so the table has height and borders stretch
         const fillerTR = document.createElement("tr");
-        fillerTR.style.height = "180px"; // Adjust height to stretch to bottom
+        const fillerH = Math.max(10, 160 - (itemRows.length * 30));
+        fillerTR.style.height = fillerH + "px"; // Adjust height to stretch to bottom
         fillerTR.innerHTML = `
             <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
         `;
@@ -453,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Hide edit/download buttons inside pdf
         const opt = {
-            margin: [10, 5, 10, 5],
+            margin: [5, 5, 5, 5],
             filename: `Invoice_${invoiceNo.replace(/[^z0-9]/gi, '_')}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
@@ -556,8 +557,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const wb = XLSX.read(ev.target.result, { type: 'binary', cellDates: true });
                 const ws = wb.Sheets[wb.SheetNames[0]];
                 const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
-                if (!rows.length) { alert("No data found in the file."); return; }
-                batchInvoices = rows.map(row => ({ data: row, status: 'pending' }));
+                const validRows = rows.filter(r => r.inv_no && String(r.inv_no).trim() !== "");
+                if (!validRows.length) { alert("No valid data found in the file."); return; }
+                batchInvoices = validRows.map(row => ({ data: row, status: 'pending' }));
                 renderBatchList();
             } catch (err) {
                 alert("Error reading file: " + err.message);
@@ -622,20 +624,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function formatExcelDate(val) {
         if (!val) return "—";
-        if (val instanceof Date) return val.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-        if (typeof val === 'string') {
-            const d = new Date(val);
-            if (!isNaN(d)) return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        let dateObj;
+        if (val instanceof Date) {
+            dateObj = new Date(val.getTime() + 12 * 60 * 60 * 1000);
+        } else { 
+            dateObj = new Date(val);
         }
-        return String(val);
+        if (isNaN(dateObj)) return String(val);
+        
+        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        const month = months[dateObj.getMonth()];
+        const year = dateObj.getFullYear();
+        return `${day} ${month} ${year}`;
     }
 
     function formatExcelDateForPreview(val) {
         // Returns "DD-Mon-YY" format matching the single invoice formatDate()
         if (!val) return "";
         let dateObj;
-        if (val instanceof Date) dateObj = val;
-        else { dateObj = new Date(val); if (isNaN(dateObj)) return String(val); }
+        if (val instanceof Date) {
+            dateObj = new Date(val.getTime() + 12 * 60 * 60 * 1000);
+        } else { 
+            dateObj = new Date(val);
+        }
+        if (isNaN(dateObj)) return String(val);
+        
         const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         const day = dateObj.getDate().toString().padStart(2, '0');
         const month = months[dateObj.getMonth()];
@@ -738,10 +752,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const amount = item.qty * item.rate;
             totalAmountCalc += amount;
 
+            let formattedParticulars = item.particulars ? item.particulars.replace(/\r/g, '').split('\n').map((line, idx) => idx === 0 ? `<strong>${line}</strong>` : line).join('<br>') : '';
+
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td class="text-center pt-1 pb-1" style="vertical-align: top;">${index + 1}</td>
-                <td class="pt-1 pb-1 particulars-preview" style="vertical-align: top;">${item.particulars}</td>
+                <td class="pt-1 pb-1 particulars-preview" style="vertical-align: top;">${formattedParticulars}</td>
                 <td class="text-left pt-1 pb-1 pl-1" style="vertical-align: top;">${item.hsn}</td>
                 <td class="text-center pt-1 pb-1" style="vertical-align: top;">${item.gst ? item.gst + ' %' : ''}</td>
                 <td class="text-center pt-1 pb-1" style="vertical-align: top;">${item.qty}</td>
@@ -772,7 +788,11 @@ document.addEventListener("DOMContentLoaded", () => {
             prevItemsBody.appendChild(trS);
         }
         const fillerTR = document.createElement("tr");
-        fillerTR.style.height = "180px";
+        // Dynamically shrink filler row to avoid pushing PDF into 2 pages
+        let textLen = 0; items.forEach(i => textLen += (i.particulars || "").length);
+        const approxItemHeight = items.length * 20 + textLen * 0.2; 
+        const fillerH = Math.max(10, 160 - approxItemHeight);
+        fillerTR.style.height = fillerH + "px";
         fillerTR.innerHTML = `<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>`;
         prevItemsBody.appendChild(fillerTR);
 
@@ -905,7 +925,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const invoiceNo = String(inv.data.inv_no || "Draft").replace(/[^a-z0-9]/gi, '_');
         html2pdf().set({
-            margin: [10, 5, 10, 5],
+            margin: [5, 5, 5, 5],
             filename: `Invoice_${invoiceNo}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true },
@@ -943,7 +963,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const invoiceNo = String(batchInvoices[i].data.inv_no || `Draft_${i + 1}`).replace(/[^a-z0-9]/gi, '_');
                     html2pdf().set({
-                        margin: [10, 5, 10, 5],
+                        margin: [5, 5, 5, 5],
                         filename: `Invoice_${invoiceNo}.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
                         html2canvas: { scale: 2, useCORS: true },
