@@ -13,6 +13,62 @@
 
 <body>
     <div class="app-container">
+
+        <!-- Batch Import Section -->
+        <section id="batch-section">
+            <div class="batch-import-card">
+                <div class="batch-import-header">
+                    <div>
+                        <h2 class="batch-import-title">📂 Bulk Invoice Manager</h2>
+                        <p class="batch-import-subtitle">Upload an Excel file with multiple invoices — preview, verify, and download PDFs one by one.</p>
+                    </div>
+                    <div class="batch-import-actions-top">
+                        <a href="#" id="batch-download-template" class="btn btn-secondary" style="font-size:13px; padding: 8px 14px;">⬇ Download Template</a>
+                        <label for="batch-file-input" class="btn btn-primary" style="cursor:pointer;">📤 Upload Excel</label>
+                        <input type="file" id="batch-file-input" accept=".xlsx,.xls,.csv" style="display:none;">
+                    </div>
+                </div>
+
+                <!-- Invoice List Table -->
+                <div id="batch-list-wrapper" class="hidden">
+                    <div class="batch-list-toolbar">
+                        <span id="batch-list-summary"></span>
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <input type="text" id="batch-search" placeholder="🔍 Search invoices..." style="margin:0; padding:7px 12px; max-width:220px; font-size:13px;">
+                            <button id="batch-btn-download-all" class="btn btn-success" style="font-size:13px; padding:7px 14px;">⬇ Download All PDFs</button>
+                            <button id="batch-btn-clear" class="btn btn-danger" style="font-size:13px; padding:7px 14px;">🗑 Clear List</button>
+                        </div>
+                    </div>
+                    <div class="batch-table-container">
+                        <table class="batch-table" id="batch-invoice-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Invoice No.</th>
+                                    <th>Date</th>
+                                    <th>Buyer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batch-invoice-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Empty state -->
+                <div id="batch-empty-state" class="batch-empty-state">
+                    <div class="batch-empty-icon">📄</div>
+                    <p>Upload an Excel file to see your invoices listed here.</p>
+                    <p style="font-size:12px; color:#aaa; margin-top:5px;">Supported: .xlsx, .xls, .csv</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Divider -->
+        <div style="text-align:center; margin: 20px 0; color:#aaa; font-size:13px; letter-spacing:1px;">— or create a single invoice manually below —</div>
+
         <!-- Form Section -->
         <section id="form-section">
             <h2>GST Invoice Generator</h2>
@@ -324,6 +380,28 @@
             </div>
         </section>
     </div>
+    <!-- Batch Import Modal Overlay — displays the REAL #invoice-preview element scaled to fit -->
+    <div id="batch-modal-overlay" class="batch-modal-overlay hidden">
+        <div class="batch-modal">
+            <div class="batch-modal-header">
+                <h3>📋 Invoice Preview</h3>
+                <button id="batch-modal-close" class="batch-modal-close">&times;</button>
+            </div>
+            <div class="batch-modal-body">
+                <div class="preview-actions" style="margin-bottom: 15px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+                    <button type="button" id="batch-btn-prev-invoice" class="btn btn-secondary">← Prev</button>
+                    <span id="batch-invoice-counter" style="font-weight:bold; align-self:center; font-size: 14px;"></span>
+                    <button type="button" id="batch-btn-next-invoice" class="btn btn-secondary">Next →</button>
+                    <button type="button" id="batch-btn-download-single" class="btn btn-success">⬇ Download PDF</button>
+                    <button type="button" id="batch-btn-mark-done" class="btn btn-primary" style="background:#9b59b6;">✓ Mark Done</button>
+                </div>
+                <!-- Invoice is moved here by JS when modal opens, moved back when closed -->
+                <div id="batch-modal-invoice-slot"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="script.js"></script>
 </body>
 
