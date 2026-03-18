@@ -453,7 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Hide edit/download buttons inside pdf
         const opt = {
-            margin: [50, 50, 50, 50],
+            margin: 0,
             filename: `Invoice_${invoiceNo.replace(/[^z0-9]/gi, '_')}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
@@ -921,7 +921,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const invoiceNo = String(inv.data.inv_no || "Draft").replace(/[^a-z0-9]/gi, '_');
         html2pdf().set({
-            margin: [50, 50, 50, 50],
+            margin: 0,
             filename: `Invoice_${invoiceNo}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true },
@@ -959,7 +959,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const invoiceNo = String(batchInvoices[i].data.inv_no || `Draft_${i + 1}`).replace(/[^a-z0-9]/gi, '_');
                     html2pdf().set({
-                        margin: [50, 50, 50, 50],
+                        margin: 0,
                         filename: `Invoice_${invoiceNo}.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
                         html2canvas: { scale: 2, useCORS: true },
