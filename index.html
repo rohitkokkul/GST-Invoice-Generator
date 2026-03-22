@@ -264,7 +264,7 @@
                     </div>
 
                     <!-- Items Table -->
-                    <div class="items-table-wrapper border-bottom">
+                    <div class="items-table-wrapper">
                         <table id="prev-items-table" class="full-width-table items-table">
                             <thead>
                                 <tr>
@@ -281,14 +281,12 @@
                             <tbody id="prev-items-body">
                                 <!-- Dynamic rows -->
                             </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="7" class="border-top text-right p-1 pr-2 border-right">Total</td>
-                                    <td class="border-top text-right p-1"><strong class="fs-14">₹ <span
-                                                id="prev-total-amount"></span></strong></td>
-                                </tr>
-                            </tfoot>
                         </table>
+                    </div>
+                    <!-- Total row - kept outside overflow:hidden wrapper so it's always visible -->
+                    <div class="flex-row border-bottom border-top" id="prev-total-row">
+                        <div style="flex: 1; text-align: right; padding: 4px 15px 4px 4px; border-right: 1px solid #777;">Total</div>
+                        <div style="width: 16%; text-align: right; padding: 4px;"><strong class="fs-14">₹ <span id="prev-total-amount"></span></strong></div>
                     </div>
 
                     <!-- Amount Words -->
