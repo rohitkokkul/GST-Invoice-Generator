@@ -404,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Add an invisible filler row so the table has height and borders stretch
         const fillerTR = document.createElement("tr");
-        fillerTR.style.height = "500px"; // Large filler; overflow:hidden in CSS crops it at single-page mark
+        fillerTR.className = "filler-row"; // CSS handles the stretching
         fillerTR.innerHTML = `
             <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
         `;
@@ -450,17 +450,25 @@ document.addEventListener("DOMContentLoaded", () => {
     btnDownload.addEventListener("click", () => {
         const invoiceNo = document.getElementById("inv-no").value || "Draft";
         const element = document.getElementById("invoice-preview");
+        const wrapper = element.querySelector('.items-table-wrapper');
+
+        // Freeze height to prevent html2canvas from expanding flex items
+        const originalHeight = wrapper.style.height;
+        wrapper.style.height = wrapper.clientHeight + 'px';
 
         // Hide edit/download buttons inside pdf
         const opt = {
             margin: 0,
             filename: `Invoice_${invoiceNo.replace(/[^z0-9]/gi, '_')}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
+            html2canvas: { scale: 2, scrollY: 0, scrollX: 0 },
             jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(element).save();
+        html2pdf().set(opt).from(element).save().then(() => {
+            // Restore height
+            wrapper.style.height = originalHeight;
+        });
     });
 
     function convertNumberToWords(amount) {
@@ -787,8 +795,8 @@ document.addEventListener("DOMContentLoaded", () => {
             prevItemsBody.appendChild(trS);
         }
         const fillerTR = document.createElement("tr");
-        // Use a large filler; flex-grow and overflow:hidden will ensure fixed structure
-        fillerTR.style.height = "500px";
+        // CSS flex layout handles the remaining height natively
+        fillerTR.className = "filler-row";
         fillerTR.innerHTML = `<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>`;
         prevItemsBody.appendChild(fillerTR);
 
@@ -919,14 +927,19 @@ document.addEventListener("DOMContentLoaded", () => {
         invoicePreviewEl.style.marginBottom = "";
         invoicePreviewEl.style.boxShadow = "";
 
+        const wrapper = invoicePreviewEl.querySelector('.items-table-wrapper');
+        const originalHeight = wrapper.style.height;
+        wrapper.style.height = wrapper.clientHeight + 'px';
+
         const invoiceNo = String(inv.data.inv_no || "Draft").replace(/[^a-z0-9]/gi, '_');
         html2pdf().set({
             margin: 0,
             filename: `Invoice_${invoiceNo}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 },
             jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
         }).from(invoicePreviewEl).save().then(() => {
+            wrapper.style.height = originalHeight;
             batchInvoices[idx].status = 'done';
             renderBatchList(batchSearchInput.value);
             if (batchCurrentIdx === idx) updateModalNav();
@@ -957,14 +970,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     invoicePreviewEl.style.marginBottom = "";
                     invoicePreviewEl.style.boxShadow = "";
 
+                    const wrapper = invoicePreviewEl.querySelector('.items-table-wrapper');
+                    const originalHeight = wrapper.style.height;
+                    wrapper.style.height = wrapper.clientHeight + 'px';
+
                     const invoiceNo = String(batchInvoices[i].data.inv_no || `Draft_${i + 1}`).replace(/[^a-z0-9]/gi, '_');
                     html2pdf().set({
                         margin: 0,
                         filename: `Invoice_${invoiceNo}.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
+                        html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0 },
                         jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
                     }).from(invoicePreviewEl).save().then(() => {
+                        wrapper.style.height = originalHeight;
                         batchInvoices[i].status = 'done';
                         renderBatchList(batchSearchInput.value);
                         resolve();
